@@ -2,6 +2,12 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import bootstapcss from'bootstrap/dist/css/bootstrap.css'
+import jquery from 'jquery'
+import Popper from 'popper.js'
 import bootstrapjs from 'bootstrap/dist/js/bootstrap.js'
 
-createApp(App).use(router,bootstapcss,bootstrapjs).mount('#app')
+
+
+window.$ = window.jQuery = jquery;
+
+createApp(App).use(router,jquery,Popper,bootstapcss,bootstrapjs).mount('#app')

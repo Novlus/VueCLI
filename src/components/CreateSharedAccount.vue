@@ -6,16 +6,40 @@
         </div>
         <div class="input-group mb-3">
             <span for="sharedAccountDescription" class="input-group-text" id="basic-addon1">Description</span>
-            <input ref ="inputDescription" v-model="description"  v-on:keypress.enter="focusInputDate()" type="text" class="form-control" id="sharedAccountDescription" placeholder="Entrez la description">
+            <input ref ="inputDescription" v-model="description"  v-on:keypress.enter="creationCompte()" type="text" class="form-control" id="sharedAccountDescription" placeholder="Entrez la description">
         </div>
-        <div class="input-group mb-3">
+        <!-- <div class="input-group mb-3">
             <span for="sharedAccountDate" class="input-group-text" id="basic-addon1">Date</span>
-            <input ref="inputDate" type="date" class="form-control" id="sharedAccountDate">
-        </div>
-        <button class="btn btn-success">Valider</button>
+            <input ref="inputDate" v-model="date" v-on:keypress.enter="creationCompte()" type="date" class="form-control" id="sharedAccountDate">
+        </div> -->
+        <button class="btn btn-success" @click="creationCompte()">Valider</button>
     </div>
-    <div v-if="errored == true">
-        <p>Vous devez remplir tous les champs!</p>
+    <div v-if="errored == true" class="alert alert-danger" role="alert">
+        <p class="mb-0">Vous devez remplir tous les champs!</p>
+    </div>
+    <div v-if="comptePartage != ''" class="affichageComptes">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Comptes crées</h3>
+            </div>
+             <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Libelle</th>
+                        <th>Description</th>
+                        <th>date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="compte in comptePartage" :key="compte.libelle">
+                        <td>{{ compte.libelle }}</td>
+                        <td>{{ compte.description }}</td>
+                        <td>{{ compte.date }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <button  class="btn btn-danger" @click="deleteAllCompte()">Vider</button>
     </div>
 </template>
 
@@ -25,7 +49,8 @@ export default {
     data()
     {
         return {
-            comptePartage:[],
+            comptePartage: [],
+            number: 1,
             libelle:'',
             description:'',
             date:'',
@@ -39,35 +64,59 @@ export default {
         {
             this.$refs.inputDescription.focus()
         },
-        focusInputDate()
+        // focusInputDate()
+        // {
+        //     this.$refs.inputDate.focus()
+        // },
+        DateDuJour()
         {
-            this.$refs.inputDate.focus()
+            const date = new Date();
+                const dateString = date.toLocaleDateString('fr-FR', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                    });
+                return dateString;
         },
-        addContact(){
+        creationCompte()
+        {   
+            const dateString = this.DateDuJour();
             this.errored = false;
-            if(this.prenom != '' && this.nom != '' && this.ville != '' && this.codePostal != '' && this.adresse != ''){
-                const contact = {};
-                contact.prenom = this.prenom
-                contact.nom = this.nom
-                contact.ville = this.ville
-                contact.codePostal = this.codePostal
-                contact.adresse = this.adresse
-            this.contactList.push(contact);
-            console.log(this.contactList);
-            this.saveContacts();
-            this.resetForm();
+            if(this.libelle != ''&& this.description != '')
+            {
+                
+              
+                const compte = {};
+                compte.id = this.number.toString();
+                compte.libelle = this.libelle;
+                compte.description = this.description;
+                compte.date = dateString
+                this.comptePartage.push(compte);
+                console.log(this.comptePartage)
+                this.saveCompte();
+                this.number = this.number +1;
+                this.resetForm();
+
             }
-            else{
+            else
+            {
                 this.errored = true;
             }
-        },
+            
 
-        deleteContact()
+        }, test()
         {
-            localStorage.clear();
+            console.log(new Date());
         },
 
-        saveContacts()
+            deleteAllCompte()
+             {// vide le local storage et redirige sur la même page
+                localStorage.clear();
+                location.replace(location.href);
+    
+             },
+
+        saveCompte()
         {
             /**
              * Enregistre la liste des contacts dans le local storage
@@ -75,8 +124,8 @@ export default {
              * @return : saved = true (boolean)
              */
 
-             const parsed = JSON.stringify(this.contactList);
-             localStorage.setItem('contactList',parsed);
+             const parsed = JSON.stringify(this.comptePartage);
+             localStorage.setItem('comptePartage',parsed);
              this.saved = true;
             
             
@@ -86,26 +135,30 @@ export default {
             /**
              * Vide le formulaire contact
              */
-            this.prenom = '';
-            this.nom = '';
-            this.adresse = '';
-            this.codePostal = '';
-            this.ville = '';
+            this.libelle= '';
+            this.description = '';
+            this.date = '';
         }
         
 
     },
     mounted()
     {
-        if (localStorage.getItem('contactList'))
+        if (localStorage.getItem('comptePartage'))
         {
             try {
-                this.contactList =
-                JSON.parse(localStorage.getItem('contactList'));
+                this.comptePartage =
+                JSON.parse(localStorage.getItem('comptePartage'));
+                let lastId = 0;
+                if (this.comptePartage.length > 0) {
+                    lastId = parseInt(this.comptePartage[this.comptePartage.length - 1].id);
+                }
+                this.number = lastId + 1;
+
             }
             catch(error)
             {
-                console.log("erreur de récupération de l'objet cintactList dans le localStorage");
+                console.log("erreur de récupération de l'objet comptePartage dans le localStorage");
             }
         }
 
@@ -115,7 +168,8 @@ export default {
 </script>
 
 <style>
-    .formulaire{
+    .formulaire,.alert,.affichageComptes{
         margin-top: 60px;
     }
+    
 </style>

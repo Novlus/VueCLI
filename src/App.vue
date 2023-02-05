@@ -1,5 +1,6 @@
 <template>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
   <a class="navbar-brand" href="#">DivideIt</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
@@ -7,12 +8,19 @@
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav">
       <li class="nav-item">
-        <router-link class="nav-link" to="/">Home page</router-link>
+        <router-link class="nav-link active" to="/" >Home page</router-link>
       </li>
       <li class="nav-item">
         <router-link class="nav-link" to="/createdsharedaccount">Création de compte partagé</router-link>
       </li>
+      <li class="nav-item">
+        <router-link class="nav-link" to="/sharedaccountmembermanagement">Gestion des membres d'un compte partagé</router-link>
+      </li>
+      <li class="nav-item">
+        <router-link class="nav-link" to="/addexpense">Dépenses</router-link>
+      </li>
     </ul>
+  </div>
   </div>
 </nav>
 <div class="container"><router-view /></div>
@@ -29,6 +37,8 @@ export default {
   }
 }
 </script>
+
+
 
 <style>
 #app {
