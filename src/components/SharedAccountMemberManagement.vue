@@ -1,9 +1,8 @@
 <template>
-    <!-- <button @click="test()">Test</button> -->
     <div class="row selectComptePartage">
         <div class="col-6">
             <h2>Choisissez un compte partagé</h2>
-            <select class="form-control" id="mySelect" v-bind:size="selectSize" v-model="selected" @change="choixComptePartage()">
+            <select class="form-control" id="mySelect" v-bind:size="selectSize" v-model="selected" @change="choixComptePartage()"> <!-- au changement de libelle de compte on déclenche la fonction choixComptePartage -->
                 <option v-for="compte in comptePartage" :key="compte.id">{{compte.libelle}}</option>
             </select>
         </div>
@@ -80,73 +79,48 @@ export default {
     },
     methods:
     {
+        /*
+        *  méthode qui sert à la Récupération des informations du compte sélectionné
+        */
+        
+
         choixComptePartage()
         {
-            this.infoMembres = [];
-           console.log(this.selected)
+           this.infoMembres = [];
            this.getCompte();
            this.getCompteMembre();
-        
-        
-        this.infoMembres.push(this.compteMembreSelected)
+           this.infoMembres.push(this.compteMembreSelected)
+        }, 
 
-            
-
-        }, test()
-        {
-            console.log(localStorage);
-        },
+        /*
+        * méthode qui sert à la suppression d'un membre
+        */
 
             deleteMembre()
            
              {    
-                this.contributeur = false;
-                let listeMembres = JSON.parse(localStorage.getItem('listeMembres'));
-                console.log(listeMembres);
-                console.log(this.compteMembreSelected.length)
+                this.contributeur = false; // boolean qui permet de savoir si un membre à déja dépensé de l'argent
+                let listeMembres = JSON.parse(localStorage.getItem('listeMembres')); // on récupère la liste des membres qui contient tous les membres de tous les comptes partagés
                 for(let i = 0; i < this.compteMembreSelected.length; i++) {
-                    if(this.compteMembreSelected[i].isChecked == true && this.compteMembreSelected[i].totalDepense == 0) {
-                    console.log(this.compteMembreSelected[i])
-                    console.log("totalDepenses")
-                    console.log(this.compteMembreSelected[i].totalDepense)
+                    if(this.compteMembreSelected[i].isChecked == true && this.compteMembreSelected[i].totalDepense == 0) { // on vérifie si le membre est coché et si il n'a pas déja dépensé de l'argent
                     let listeMembres2 = listeMembres.filter(membre => membre.id != this.compteMembreSelected[i].id || membre.pseudo != this.compteMembreSelected[i].pseudo);
-                    console.log("liste des membres après suppression");
-                    console.log(listeMembres2);
                     listeMembres = listeMembres2
                     }
-                    if(this.compteMembreSelected[i].isChecked == true && this.compteMembreSelected[i].totalDepense != 0){
-                        this.contributeur = true;
+                    if(this.compteMembreSelected[i].isChecked == true && this.compteMembreSelected[i].totalDepense != 0){ // si le membre est coché et qu'il a déja dépensé de l'argent
+                        this.contributeur = true; // on passe le boolean à true pour afficher un message d'erreur
                     }
                 }
-                localStorage.setItem('listeMembres', JSON.stringify(listeMembres));
-                if(this.contributeur == false)
+                localStorage.setItem('listeMembres', JSON.stringify(listeMembres)); // on enregistre la nouvelle liste des membres dans le localStorage
+                if(this.contributeur == false) // si il n'y a pas eu de problème on recharge la page
                 {
                     location.replace(location.href);
                 }
             },
 
-        saveCompte()
-        {
-            /**
-             * Enregistre la liste des contacts dans le local storage
-             * @constant : contactList (array)
-             * @return : saved = true (boolean)
-             */
+            /*
+            * méthode qui sert à récupérer les informations du compte sélectionné
+            */
 
-             const parsed = JSON.stringify(this.comptePartage);
-             localStorage.setItem('comptePartage',parsed);
-             this.saved = true;
-            
-            
-        },
-        // resetForm()
-        // {
-        //     /**
-        //      * Vide le formulaire contact
-        //      */
-        //     this.pseudo= '';
-            
-        // },
         getCompte() {
        // récupère les données du compte sélectionné dans le localStorage
         let compte = JSON.parse(localStorage.getItem('comptePartage'));
@@ -159,54 +133,60 @@ export default {
             }
         },
 
+        /*
+        * méthode qui sert à récupérer les informations des membres du compte sélectionné
+        */
         getCompteMembre()
         {
         
         let compteMembres = JSON.parse(localStorage.getItem('listeMembres'));
         let compteMembresSelected = [];
         for (let i = 0; i < compteMembres.length; i++) {
-            if (compteMembres[i].id == this.idSelected) {
-                compteMembres[i].isChecked = false
-                compteMembresSelected.push(compteMembres[i]);
+            if (compteMembres[i].id == this.idSelected) { // on récupère les membres qui ont le même id que le compte sélectionné
+                compteMembres[i].isChecked = false // on ajoute un attribut isChecked à chaque membre pour savoir si il est coché ou non
+                compteMembresSelected.push(compteMembres[i]); // on ajoute le membre à la liste des membres du compte sélectionné
             }
         }
-        this.compteMembreSelected = compteMembresSelected;
+        this.compteMembreSelected = compteMembresSelected; // on enregistre la liste des membres du compte sélectionné dans une variable
         return compteMembresSelected;
 
         },
-        ajoutMembre() {
-            this.membreExistant = false;
-            this.errored = false;
-            if (this.pseudo != '') {
-                let pseudo = this.pseudo;
-                let idCompte = this.getCompte().id;
 
-                let listeMembres = localStorage.getItem("listeMembres");
-                if (listeMembres === null) {
+        /*
+        * méthode qui sert à l'ajout d'un membre
+        */
+        ajoutMembre() {
+            this.membreExistant = false; // boolean qui permet de savoir si le membre existe déjà 
+            this.errored = false; // boolean qui permet de savoir si le pseudo est vide 
+            if (this.pseudo != '') { // si on a rempli le champ pseudo
+                let pseudo = this.pseudo;
+                let idCompte = this.getCompte().id; // on récupère l'id du compte sélectionné
+
+                let listeMembres = localStorage.getItem("listeMembres"); // on récupère la liste des membres qui contient tous les membres de tous les comptes partagés
+                if (listeMembres === null) { // si la liste est vide
                     listeMembres = [];
                     } else {
-                    listeMembres = JSON.parse(listeMembres);
+                    listeMembres = JSON.parse(listeMembres); // on parse la liste des membres pour pouvoir l'utiliser en tant que liste d'objet
                     }
 
-                    let membreExistant = listeMembres.find(
+                    let membreExistant = listeMembres.find(  // on vérifie si le membre existe déjà dans la liste
                     membre => membre.id === idCompte && membre.pseudo === pseudo);
-                    if (!membreExistant) {
-                        const infoMembre = {};
+                    if (!membreExistant) { // si le membre n'existe pas on l'ajoute à la liste
+                        const infoMembre = {}; // on crée un objet qui contient les informations du membre
                         infoMembre.id = idCompte;
                         infoMembre.pseudo = pseudo;
                         infoMembre.totalDepense = 0;
                         infoMembre.depense = [];
 
-                        listeMembres.push(infoMembre);
-                        localStorage.setItem("listeMembres", JSON.stringify(listeMembres));
-                        console.log(localStorage);
-                        location.replace(location.href);
+                        listeMembres.push(infoMembre); // on ajoute le membre à la liste des membres
+                        localStorage.setItem("listeMembres", JSON.stringify(listeMembres)); // on enregistre la liste des membres dans le localStorage
+                        location.replace(location.href); // on recharge la page
                     } else {
-                    console.log("Ce membre existe déjà dans la liste");
-                    this.membreExistant = true;
+                    console.log("Ce membre existe déjà dans la liste"); // si le membre existe déjà on affiche un message d'erreur
+                    this.membreExistant = true; // on passe le boolean à true pour afficher un message d'erreur
                     }
                 } else {
-            this.errored = true;
+            this.errored = true; // si le champ pseudo est vide on passe le boolean à true pour afficher un message d'erreur
                  }
     }
         
@@ -214,14 +194,14 @@ export default {
         
 
     },
-    mounted()
+    mounted() 
     {
-        if (localStorage.getItem('comptePartage'))
+        if (localStorage.getItem('comptePartage')) // on récupère les données du compte partagé dans le localStorage
         {
             try {
                 this.comptePartage =
                 JSON.parse(localStorage.getItem('comptePartage'));
-                this.selectSize = this.comptePartage.length;
+                this.selectSize = this.comptePartage.length; // on récupère la taille de la liste des comptes partagés
             }
             catch(error)
             {
